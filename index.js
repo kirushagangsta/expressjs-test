@@ -5,36 +5,40 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 
-var indexRouter = require('./routes/index');
+var appRouter = require('./routes/app');
 var usersRouter = require('./routes/users');
 
-var index = express();
+var app = express();
 
 // view engine setup
-index.set('views', path.join(__dirname, 'views'));
-index.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
-index.use(logger('dev'));
-index.use(express.json());
-index.use(express.urlencoded({ extended: false }));
-index.use(cookieParser());
-index.use(express.static(path.join(__dirname, 'public')));
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/', appRouter);
+app.use('/users', usersRouter);
+app.use(cors())
 
-index.use('/', indexRouter);
-index.use('/users', usersRouter);
-index.use(cors())
+app.get('/', (req, res) => {
+  res.send('Hey this is my API running 🥳')
+})
 
-index.get('/products', function (req, res, next) {
+
+app.get('/products', function (req, res, next) {
   res.json({msg: 'This is CORS-enabled for all origins!'})
 })
 
 // catch 404 and forward to error handler
-index.use(function(req, res, next) {
+app.use(function(req, res, next) {
   next(createError(404));
 });
 
 // error handler
-index.use(function(err, req, res, next) {
+app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -44,4 +48,4 @@ index.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = index;
+module.exports = app;
